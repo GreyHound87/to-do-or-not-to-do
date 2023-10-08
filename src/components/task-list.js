@@ -89,6 +89,8 @@ export default class TaskList extends Component {
             id={`edit-${item.id}`}
             name={`edit-${item.id}`} 
             autoFocus
+            minLength="1"
+            maxLength="20"
             /* null для исходника при редактировании */
             value={this.state.editedLabel === null ? item.label : this.state.editedLabel}
             placeholder={ item.label }

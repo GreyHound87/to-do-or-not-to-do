@@ -63,6 +63,15 @@ body {
 	bottom: 100%;
 }
 
+/* немного от себя, для навигации с клавиатуры */
+
+input:focus,
+.toggle:focus + label,
+button:focus {
+	outline: 2px solid #af5b5e;
+	border-radius: 8px;
+}
+
 /* не нашел, куда должно применяться */
 
 /* .toggle-all + label {

@@ -37,7 +37,7 @@ const Task = ({ label, id, completed, created, onToggleCompleted, onToggleEditin
               onChange={onToggleCompleted} />
       <label htmlFor={`task-${id}`}>
         <span className="description">{label}</span>
-        <span className="created">{`created ${formatDistanceToNow(created, { includeSeconds: true })}`}</span>
+        <span className="created">{`created ${formatDistanceToNow(created, { includeSeconds: true })} ago`}</span>
       </label>
       <button className="icon icon-edit" type="button" onClick={onToggleEditing}></button>
       <button className="icon icon-destroy" type="button" onClick={onDestroy}></button>

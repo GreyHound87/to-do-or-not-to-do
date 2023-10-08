@@ -1,70 +1,56 @@
-# Getting Started with Create React App
+# TODO App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Простое приложение для управления задачами.
 
-## Available Scripts
+## Описание
 
-In the project directory, you can run:
+Это приложение представляет собой простой список задач с возможностью добавления, удаления, редактирования и фильтрации. Верстка приложения была взята из предоставленного репозитория и разбита на компоненты. Отображение компонентов реализовано с использованием JSX. Весь код основан на библиотеке React, а для стилизации компонентов используются стили из CSS-файлов. Каждый компонент имеет четко определенную задачу, что облегчает понимание и поддержку кода.
 
-### `npm start`
+## Структура Компонентов
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- `TodoApp` - главный компонент, который содержит всю основную логику и состояние приложения. Он также управляет другими подкомпонентами.
+- `NewTaskForm` - компонент для создания новых задач.
+- `TaskList` - компонент для отображения списка задач. Включает в себя отдельные компоненты `Task`, представляющие собой отдельные задачи.
+- `Footer` - компонент, отображающий футер приложения с информацией о количестве оставшихся задач и фильтрами.
+- `TaskFilter` - компонент, отвечающий за отображение фильтров задач.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Разделение Данных и Представления
 
-### `npm test`
+В приложении данные и их отображение разделены согласно принципам разработки React-приложений. Модель данных отражает структуру задач и их состояние в приложении. Все данные в компонент `Task` передаются через `props` из верхнего компонента приложения. Список задач находится в состоянии родительского компонента `TodoApp`.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Управление Состоянием
 
-### `npm run build`
+Управление состоянием осуществляется через `state`, который хранится в компоненте `TodoApp`. Компоненты-подкомпоненты, такие как `TaskList`, `Footer` и `NewTaskForm`, получают доступ к состоянию и обновлениям через `props`, передаваемые им из `TodoApp`. Это позволяет им отображать и обновлять данные в соответствии с текущим состоянием.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Обратный Поток Данных
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Реализован однонаправленный поток данных в приложении. Колбэк-функции переданы из родительских компонентов к дочерним, чтобы обновлять состояние в родительских компонентах. Событие `onChange` используется для получения уведомлений об изменениях элементов.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Минимальное Состояние Приложения
 
-### `npm run eject`
+- `taskData` - массив объектов, представляющих задачи. Является основой для отображения задач.
+- `filter` - строка, представляющая текущий фильтр для отображения задач (например, "All", "Active", "Completed").
+- `label` - строка, представляющая текст новой задачи, которую пользователь хочет добавить. Эта строка хранится в состоянии компонента `NewTaskForm` и изменяется при вводе пользователем.
+- `editedLabel` - строка, представляющая текст редактируемой задачи. Эта строка хранится в состоянии компонента `TaskList` и изменяется при редактировании пользователем.
+- `editedId` - строка, представляющая идентификатор редактируемой задачи. Этот идентификатор хранится в состоянии компонента `TaskList` и используется для определения, какую задачу редактирует пользователь.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Функциональность
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- Изменение состояния задачи (активный/выполненный).
+- Удаление задачи из списка.
+- Добавление новых задач.
+- Логика фильтрации задач по статусу.
+- Возможность удаления всех завершенных задач.
+- Счетчик незавершенных задач.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Дополнительная Информация
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- Время создания задачи фиксируется в момент её добавления с использованием класса `Date`. В списке выводится в виде "created N seconds / minutes ago" с использованием функции `formatDistanceToNow` из библиотеки `date-fns`.
+- Всем компонентам добавлены `defaultProps` и `propTypes`.
 
-## Learn More
+## Планы по Улучшению
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Модульность и прямолинейность в коде возможно улучшить. Планирую поработать над независимостью компонентов, управлением состоянием и обновлениями.
+Можно поковаряться с валидацией инпутов.
+Можно попробовать реализовать хранение состояния в localStorage.
+Также хуки — это более современный подход к управлению состоянием, который предстоит реализовать.

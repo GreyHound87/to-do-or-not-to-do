@@ -1,7 +1,8 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import Task from './task';
-import './task-list.css';
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
+
+import Task from './task'
+import './task-list.css'
 
 /* TaskList - компонент-контейнер, отображающий список задач */
 
@@ -13,65 +14,74 @@ import './task-list.css';
 /* Возможно, рационально было бы разделить TaskList на несколько более мелких компонентов */
 
 export default class TaskList extends Component {
-
   /* хранит локальное состояние editedLabel и editedId,
   Возможно, стоит переместить в TodoApp ?.. */
 
+  inputRef = React.createRef() // Create a ref for the input element
+
   state = {
-    /* null для исходника при редактировании */
+    /* null для установки исходника в инпут при редактировании */
     editedLabel: null,
     editedId: '',
-  };  
+  }
 
-  static defaultProps = {
-    tasks: [],
-    onDestroy: () => {},
-    onToggleCompleted: () => {},
-    onToggleEditing: () => {},
-    editTask: () => {},
-    onBlurEditing: () => {}
-  };
+  componentDidMount() {
+    this.focusInput()
+  }
 
-  static propTypes = {
-    tasks: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        label: PropTypes.string.isRequired,
-        created: PropTypes.instanceOf(Date).isRequired,
-        completed: PropTypes.bool.isRequired,
-        editing: PropTypes.bool.isRequired,
-    })),
-    onDestroy: PropTypes.func,
-    onToggleCompleted: PropTypes.func,
-    onToggleEditing: PropTypes.func,
-    editTask: PropTypes.func,
-    onBlurEditing: PropTypes.func,
-  };
+  componentDidUpdate(prevProps) {
+    const { tasks } = this.props
+    if (tasks.some((task) => task.editing !== prevProps.tasks.find((prevTask) => prevTask.id === task.id)?.editing)) {
+      this.focusInput()
+    }
+  }
 
   /* Управление состоянием через локальное состояние компонента */
 
   onLabelChange = (e, id) => {
-    this.setState({ 
+    this.setState({
       editedLabel: e.target.value,
-      editedId: id
-    });
-  };
+      editedId: id,
+    })
+  }
 
   onSubmit = (e) => {
-    if (e.key === 'Enter' && this.state.editedLabel === null) {
-      window.alert('Enter task text!');
-    } else if (e.key === 'Enter' && this.state.editedLabel.trim() === '') {
-      window.alert('Enter task text!');
+    const { editedLabel, editedId } = this.state
+    const { editTask } = this.props
+    if (e.key === 'Enter' && editedLabel === null) {
+      this.setState({ editedLabel: null, editedId: '' })
+    } else if (e.key === 'Enter' && editedLabel.trim() === '') {
+      this.setState({ editedLabel: null, editedId: '' })
     } else if (e.key === 'Enter') {
-      this.props.editTask(this.state.editedLabel, this.state.editedId);
-      this.setState({ editedLabel: null, editedId: '' });
+      editTask(editedLabel, editedId)
+      this.setState({ editedLabel: null, editedId: '' })
     }
-  };  
+  }
+
+  onBlur = (id) => {
+    const { onBlur } = this.props
+    this.setState({
+      editedLabel: null,
+      editedId: '',
+    })
+    onBlur(id)
+  }
+
+  focusInput() {
+    if (this.inputRef.current) {
+      this.inputRef.current.focus()
+    }
+  }
 
   render() {
-    const { tasks, onDestroy, onToggleCompleted, onToggleEditing } = this.props;
+    const { editedLabel } = this.state
+    const { tasks, onDestroy, onToggleCompleted, onToggleEditing } = this.props
     const elements = tasks.map((item) => (
-     
-      <li key={item.id} className={`${item.completed ? "completed" : ""} ${item.editing ? "editing" : ""}`}>
+      <li
+        key={item.id}
+        className={`${item.completed ? 'completed' : ''}
+        ${item.editing ? 'editing' : ''}`}
+      >
         <Task
           label={item.label}
           id={item.id}
@@ -87,27 +97,56 @@ export default class TaskList extends Component {
             type="text"
             className="edit"
             id={`edit-${item.id}`}
-            name={`edit-${item.id}`} 
-            autoFocus
-            minLength="1"
+            name={`edit-${item.id}`}
+            pattern=".{1,}"
+            required
             maxLength="20"
             /* null для исходника при редактировании */
-            value={this.state.editedLabel === null ? item.label : this.state.editedLabel}
-            placeholder={ item.label }
+            value={editedLabel === null ? item.label : editedLabel}
+            placeholder={item.label}
             onChange={(e) => this.onLabelChange(e, item.id)}
             onKeyDown={this.onSubmit}
-            onBlur={() => this.props.editTask(item.label, item.id)}
+            onBlur={() => this.onBlur(item.id)}
+            ref={this.inputRef}
+            style={{
+              backgroundColor:
+                typeof editedLabel === 'string' && editedLabel.trim() === '' ? 'rgba(175, 47, 47, 0.15)' : 'initial',
+            }}
           />
         )}
       </li>
-    ));
+    ))
 
     return (
       <main className="main">
-        <ul className="todo-list">
-          {elements}
-        </ul>
+        <ul className="todo-list">{elements}</ul>
       </main>
-    );
+    )
   }
+}
+
+TaskList.defaultProps = {
+  tasks: [],
+  onDestroy: () => {},
+  onToggleCompleted: () => {},
+  onToggleEditing: () => {},
+  editTask: () => {},
+  onBlur: () => {},
+}
+
+TaskList.propTypes = {
+  tasks: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+      created: PropTypes.instanceOf(Date).isRequired,
+      completed: PropTypes.bool.isRequired,
+      editing: PropTypes.bool.isRequired,
+    })
+  ),
+  onDestroy: PropTypes.func,
+  onToggleCompleted: PropTypes.func,
+  onToggleEditing: PropTypes.func,
+  editTask: PropTypes.func,
+  onBlur: PropTypes.func,
 }

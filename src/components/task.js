@@ -3,17 +3,31 @@ import PropTypes from 'prop-types'
 import { formatDistanceToNow } from 'date-fns'
 import './task.css'
 
-/* Task - функциональный компонент-представление, отдельная задача списка */
-
-function Task({ label, id, completed, created, onToggleCompleted, onToggleEditing, onDestroy }) {
+function Task({
+  label,
+  id,
+  completed,
+  created,
+  timer,
+  tracking,
+  onToggleCompleted,
+  onToggleEditing,
+  onDestroy,
+  onTogglePlay,
+  onTogglePause,
+}) {
   Task.defaultProps = {
     label: '',
     id: '',
     completed: false,
     created: new Date(),
+    timer: null,
+    tracking: false,
     onToggleCompleted: () => {},
     onToggleEditing: () => {},
     onDestroy: () => {},
+    onTogglePlay: () => {},
+    onTogglePause: () => {},
   }
 
   Task.propTypes = {
@@ -21,42 +35,125 @@ function Task({ label, id, completed, created, onToggleCompleted, onToggleEditin
     id: PropTypes.string,
     completed: PropTypes.bool,
     created: PropTypes.instanceOf(Date),
+    timer: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
+    tracking: PropTypes.bool,
     onToggleCompleted: PropTypes.func,
     onToggleEditing: PropTypes.func,
     onDestroy: PropTypes.func,
+    onTogglePlay: PropTypes.func,
+    onTogglePause: PropTypes.func,
+  }
+
+  const colorGradation = {
+    red: '#E90000',
+    orange: '#E97E00',
+    yellow: '#E9D100',
+    green: '#66E900',
+  }
+
+  function getColorForTimer() {
+    if (timer <= 86400000) {
+      return colorGradation.red
+    }
+    if (timer <= 604800000) {
+      return colorGradation.orange
+    }
+    if (timer <= 2592000000) {
+      return colorGradation.yellow
+    }
+    return colorGradation.green
+  }
+
+  const timerColor = getColorForTimer(timer)
+
+  function formatTimeLeft() {
+    if (timer === 0) {
+      return 'time is over'
+    }
+    if (timer <= 3600000) {
+      const minutes = Math.floor(timer / 60000)
+      const seconds = Math.floor((timer % 60000) / 1000)
+      return `${minutes}:${seconds < 10 ? '0' : ''}${seconds} left`
+    }
+
+    return `${formatDistanceToNow(new Date(new Date().getTime() + timer), {
+      includeSeconds: true,
+    })} left`
   }
 
   return (
-    <div className="view">
-      <input
-        className="toggle"
-        type="checkbox"
-        id={`task-${id}`}
-        name={`task-${id}`}
-        checked={completed}
-        onChange={onToggleCompleted}
-      />
-      <label htmlFor={`task-${id}`}>
-        <span className="description">{label}</span>
-        <span className="created">{`created ${formatDistanceToNow(created, {
-          includeSeconds: true,
-        })} ago`}</span>
-      </label>
+    <div
+      className="view"
+      style={{
+        backgroundColor: timer === 0 ? 'rgba(175, 47, 47, 0.15)' : 'initial',
+      }}
+    >
+      <div className="task-wrapper">
+        <input
+          className="toggle visually-hidden"
+          type="checkbox"
+          id={`task-${id}`}
+          name={`task-${id}`}
+          checked={completed}
+          onChange={onToggleCompleted}
+        />
+        <label htmlFor={`task-${id}`}>
+          <span className="description">{label}</span>
+          <span className="created">{`created ${formatDistanceToNow(created, {
+            includeSeconds: true,
+          })} ago`}</span>
+          {timer !== null && (
+            <span
+              className={`time-left ${tracking && timer && !completed ? 'blinking-text' : ''}`}
+              style={{ textShadow: `0 0 1px ${timerColor}` }}
+            >
+              {formatTimeLeft(timer)}
+            </span>
+          )}
+        </label>
+      </div>
+      <div className="btn-wrapper">
+        <button
+          id={`play-btn-${id}`}
+          className="icon icon-play"
+          type="button"
+          onClick={onTogglePlay}
+          disabled={completed}
+          style={{
+            display: timer !== null && timer > 0 && !tracking && !completed ? 'flex' : 'none',
+          }}
+        >
+          <span className="visually-hidden">play task</span>
+        </button>
 
-      <button
-        id={`edit-btn-${id}`}
-        className="icon icon-edit"
-        type="button"
-        onClick={onToggleEditing}
-        disabled={completed}
-        style={{ display: completed ? 'none' : 'initial' }}
-      >
-        <span className="visually-hidden">edit task</span>
-      </button>
+        <button
+          id={`pause-btn-${id}`}
+          className="icon icon-pause"
+          type="button"
+          onClick={onTogglePause}
+          disabled={completed}
+          style={{
+            display: timer !== null && timer > 0 && tracking && !completed ? 'flex' : 'none',
+          }}
+        >
+          <span className="visually-hidden">pause task</span>
+        </button>
 
-      <button id={`delete-btn-${id}`} className="icon icon-destroy" type="button" onClick={onDestroy}>
-        <span className="visually-hidden">delete task</span>
-      </button>
+        <button
+          id={`edit-btn-${id}`}
+          className="icon icon-edit"
+          type="button"
+          onClick={onToggleEditing}
+          disabled={completed}
+          style={{ display: completed ? 'none' : 'initial' }}
+        >
+          <span className="visually-hidden">edit task</span>
+        </button>
+
+        <button id={`delete-btn-${id}`} className="icon icon-destroy" type="button" onClick={onDestroy}>
+          <span className="visually-hidden">delete task</span>
+        </button>
+      </div>
     </div>
   )
 }

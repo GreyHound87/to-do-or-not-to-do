@@ -4,6 +4,8 @@
   list-style: none;
   right: 0;
   left: 0;
+  display: flex;
+  justify-content: center;
 }
 
 .filters li {
@@ -19,6 +21,8 @@
   text-decoration: none;
   border: 1px solid transparent;
   border-radius: 3px;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
 }
 
 .filters li button:not(.selected) {
@@ -35,6 +39,7 @@
 
 @media (max-width: 430px) {
   .filters {
-    bottom: 10px;
+    position: absolute;
+    bottom: 5px;
   }
 }

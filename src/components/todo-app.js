@@ -5,52 +5,57 @@ import Footer from './footer'
 import NewTaskForm from './new-task-form'
 import './todo-app.css'
 
-/* TodoApp - это основной, главенствующий, корневой компонент-контейнер,
-содержащий другие компоненты и управляющий состоянием приложения в целом(список задач, текущий фильтр) */
-
-/* Задачи и ответственность: управляет общим состоянием,
-обрабатывает события, такие как добавление, редактирование и удаление задач, изменение фильтра,
-координирует работу остальных компонентов и  подкомпонентов  */
-
-function createTask(label) {
+function createTask(label, timer) {
   const created = new Date()
+  const tracking = timer !== null
+
   return {
-    /* текст задачи */
     label,
-    /* флаг, указывающий на выполнение задачи */
     completed: false,
-    /* флаг, указывающий на режим редактирования задачи */
     editing: false,
-    /* дата создания задачи */
     created,
-    /* уникальный идентификатор задачи */
     id: `${(+created).toString(16)}-${Math.random().toString(16).slice(2)}`,
+    timer,
+    tracking,
   }
 }
+
 export default class TodoApp extends Component {
-  /* Минимальный набор состояний */
-
   state = {
-    /* Массив объектов, представляющих задачи
-    отображается в TaskList */
     taskData: [
-      createTask('сreate static To-Do'),
-      createTask('add new task'),
-      createTask('mark completed'),
-      createTask('edit task text'),
-      createTask('remove task'),
-      createTask('filter by status'),
-      createTask('clear completed'),
-      createTask('use props'),
-
-      /* Модель данных представлена в виде массива объектов */
+      createTask('Example task without timer', null),
+      createTask('Example task with 1 minute timer', 60000),
+      createTask('Example task with 10 minutes timer', 600000),
     ],
-    /* Строка, представляющая текущий фильтр задач
-    отображается в компоненте Footer */
     filter: 'All',
   }
 
-  /* Управление состоянием через локальное состояние компонента */
+  componentDidMount() {
+    this.intervalId = setInterval(this.decrementTimers, 1000)
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.intervalId)
+  }
+
+  decrementTimers = () => {
+    this.setState(({ taskData }) => {
+      const updatedTaskData = taskData.map((task) => {
+        if (task.tracking && task.timer !== null && !task.editing && !task.completed) {
+          const updatedTimer = task.timer - 1000
+          return {
+            ...task,
+            timer: updatedTimer >= 0 ? updatedTimer : 0,
+          }
+        }
+        return task
+      })
+
+      return {
+        taskData: updatedTaskData,
+      }
+    })
+  }
 
   destroyTask = (id) => {
     this.setState(({ taskData }) => ({
@@ -58,11 +63,11 @@ export default class TodoApp extends Component {
     }))
   }
 
-  addTask = (text) => {
-    const newTask = createTask(text)
+  addTask = (text, timer) => {
+    const newTask = createTask(text, timer)
     this.setState(({ taskData }) => {
       const newData = [...taskData, newTask]
-      return { taskData: newData }
+      return { taskData: newData, filter: 'All' }
     })
   }
 
@@ -97,13 +102,29 @@ export default class TodoApp extends Component {
     })
   }
 
-  editTask = (text, id) => {
+  editTask = (text, timer, id) => {
     this.setState(({ taskData }) => {
-      const updatedTaskData = taskData.map((task) => ({
-        ...task,
-        label: task.id === id ? text : task.label,
-        editing: false,
-      }))
+      const updatedTaskData = taskData.map((task) => {
+        let newTimer = task.timer
+        let newText = task.label
+
+        if (timer === 0) {
+          newTimer = null
+        } else if (timer !== null) {
+          newTimer = timer
+        }
+
+        if (text !== null && text.trim() !== '') {
+          newText = text
+        }
+
+        return {
+          ...task,
+          label: task.id === id ? newText : task.label,
+          timer: task.id === id ? newTimer : task.timer,
+          editing: false,
+        }
+      })
 
       return {
         taskData: updatedTaskData,
@@ -127,8 +148,6 @@ export default class TodoApp extends Component {
     this.setState({ filter })
   }
 
-  /* отделить filterTasks?.. */
-
   filterTasks = (tasks) => {
     const { filter } = this.state
 
@@ -147,6 +166,42 @@ export default class TodoApp extends Component {
     })
   }
 
+  onTogglePlay = (id) => {
+    this.setState(({ taskData }) => {
+      const updatedTaskData = taskData.map((task) => {
+        if (task.id === id) {
+          return {
+            ...task,
+            tracking: true,
+          }
+        }
+        return task
+      })
+
+      return {
+        taskData: updatedTaskData,
+      }
+    })
+  }
+
+  onTogglePause = (id) => {
+    this.setState(({ taskData }) => {
+      const updatedTaskData = taskData.map((task) => {
+        if (task.id === id) {
+          return {
+            ...task,
+            tracking: false,
+          }
+        }
+        return task
+      })
+
+      return {
+        taskData: updatedTaskData,
+      }
+    })
+  }
+
   render() {
     const { taskData, filter } = this.state
     const filteredTasks = this.filterTasks(taskData)
@@ -158,7 +213,6 @@ export default class TodoApp extends Component {
           <h1>todos</h1>
           <NewTaskForm onTaskAdded={this.addTask} />
         </header>
-        {/* Данные передаются между компонентами через пропсы */}
         <TaskList
           onDestroy={this.destroyTask}
           onToggleCompleted={this.onToggleCompleted}
@@ -166,6 +220,8 @@ export default class TodoApp extends Component {
           editTask={this.editTask}
           tasks={filteredTasks}
           onBlur={this.onBlur}
+          onTogglePlay={this.onTogglePlay}
+          onTogglePause={this.onTogglePause}
         />
         <Footer
           taskCount={taskCount}

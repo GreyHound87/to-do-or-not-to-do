@@ -2,9 +2,6 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import './task-filter.css'
 
-/* TaskFilter - компонент, отвечающий за фильтрацию задач */
-/* Задачи и ответственность: позволяет выбирать фильтр для задач (All, Active, Completed)  */
-
 function TaskFilter({ filter, setFilter }) {
   TaskFilter.defaultProps = {
     filter: 'All',

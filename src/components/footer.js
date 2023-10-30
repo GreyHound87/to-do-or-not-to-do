@@ -4,10 +4,6 @@ import PropTypes from 'prop-types'
 import TaskFilter from './task-filter'
 import './footer.css'
 
-/* Footer - компонент-представление, отображающий информацию о задачах и позволяющий фильтровать их */
-/* Задачи и ответственность:  отображает количество задач и фильтры,
-предоставляет функциональность фильтрации и очистки завершенных задач  */
-
 function Footer({ taskCount, filter, setFilter, clearCompletedTasks }) {
   Footer.defaultProps = {
     taskCount: 0,

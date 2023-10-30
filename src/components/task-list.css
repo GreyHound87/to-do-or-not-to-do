@@ -28,7 +28,6 @@
 }
 
 .todo-list li {
-  position: relative;
   font-size: 24px;
   border-bottom: 1px solid #ededed;
 }
@@ -55,4 +54,65 @@
 
 .todo-list li.editing:last-child {
   margin-bottom: -1px;
+}
+
+.edit-timer-container {
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 16px;
+  border: none;
+  background: rgba(0, 0, 0, 0.003);
+  font-style: italic;
+  font-weight: 300;
+  color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.edit-todo-form__timer {
+  margin: 0;
+  font-family: inherit;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  border: none;
+  background: rgba(0, 0, 0, 0.003);
+  font-style: italic;
+  font-weight: 300;
+  color: rgba(0, 0, 0, 0.4);
+  padding: 2px;
+  border-radius: 8px;
+  animation: colorFade 10s ease-in-out 1s infinite;
+}
+
+.edit-timer-mess {
+  font-size: 14px;
+  color: #af5b5e;
+  padding: 5px;
+  outline: 2px solid #af5b5e;
+  border-radius: 8px;
+  background-color: #cdcdcd;
+  border-radius: 4px;
+  position: absolute;
+  top: 100%;
+  left: 85px;
+  z-index: 1000;
+  width: 200px;
+  box-shadow: inset 0 -1px 5px 0 rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  animation: fade 10s ease 1s;
+}
+
+.edit-timer-mess::before {
+  content: '';
+  position: absolute;
+  top: -21px;
+  right: 80%;
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent transparent #af5b5e transparent;
 }

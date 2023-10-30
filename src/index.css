@@ -67,73 +67,55 @@ body {
   bottom: 100%;
 }
 
-/* немного от себя, для навигации с клавиатуры */
-
 input:focus,
+select:focus,
 .toggle:focus + label,
 button:focus {
   outline: 2px solid #af5b5e;
   border-radius: 8px;
 }
 
-/* не нашел, куда должно применяться */
-
-/* .toggle-all + label {
-	width: 60px;
-	height: 34px;
-	font-size: 0;
-	position: absolute;
-	top: -52px;
-	left: -13px;
-	-webkit-transform: rotate(90deg);
-	transform: rotate(90deg);
+@keyframes fade {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
 }
 
-.toggle-all + label:before {
-	content: '❯';
-	font-size: 22px;
-	color: #e6e6e6;
-	padding: 10px 27px 10px 27px;
+@keyframes colorFade {
+  0%,
+  100% {
+    color: rgba(0, 0, 0, 0.4);
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.003);
+  }
+  25% {
+    color: #000;
+    box-shadow: 0 2px 2px #af5b5e;
+  }
+  75% {
+    color: #af5b5e;
+    box-shadow: 0 2px 2px #000;
+  }
 }
 
-.toggle-all:checked + label:before {
-	color: #737373;
-}
- */
-
-/* не нашел, куда должно применяться */
-
-/* .info {
-	margin: 65px auto 0;
-	color: #4d4d4d;
-	font-size: 11px;
-	text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-	text-align: center;
-}
-
-.info p {
-	line-height: 1;
+@keyframes textBlink {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  50% {
+    transform: scale(1.01);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
 }
 
-.info a {
-	color: inherit;
-	text-decoration: none;
-	font-weight: 400;
-}
-
-.info a:hover {
-	text-decoration: underline;
-} */
-
-/*
-	Hack to remove background from Mobile Safari.
-	Can't use it globally since it destroys checkboxes in Firefox
-*/
-
-/* не нашел, куда должно применяться */
-
-/* @media screen and (-webkit-min-device-pixel-ratio:0) {
-	.toggle-all {
-		background: none;
-	}
-} */

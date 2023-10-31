@@ -72,7 +72,6 @@ export default class NewTaskForm extends Component {
   }
 
   handleSubmit = (e) => {
-    e.preventDefault()
     if (e.key === 'Enter') {
       this.onSubmit(e)
     }
@@ -349,6 +348,9 @@ export default class NewTaskForm extends Component {
                 <option value="59">59 seconds</option>
                 <option value="60">60 seconds</option>
               </select>
+              <button className="new-todo-form__submit" type="submit">
+                ⏎
+              </button>
             </div>
           )}
         </label>

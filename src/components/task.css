@@ -122,7 +122,7 @@
 }
 
 .todo-list li .icon-play {
-  padding: 1px 0px 0px 3px;
+  padding: 1px 0 0 3px;
   font-size: 15px;
   display: flex;
   align-items: center;
@@ -130,7 +130,7 @@
 }
 
 .todo-list li .icon-pause {
-  padding: 0px 0px 1px 0px;
+  padding: 0 0 1px 0;
   font-size: 18px;
   display: flex;
   align-items: center;
@@ -138,19 +138,17 @@
 }
 
 .todo-list li .icon-edit {
-  padding: 0px 0px 2px 0px;
+  padding: 0 0 2px 0;
   font-size: 19px;
 }
 
 .todo-list li .icon-destroy {
-  padding: 0px 0px 0px 0px;
+  padding: 0;
 }
 
 .blinking-text {
   animation: textBlink 1s infinite;
 }
-
-
 
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
   .todo-list li .toggle {

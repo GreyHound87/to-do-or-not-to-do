@@ -66,36 +66,35 @@ export default class TaskList extends Component {
     let { editedId, editedLabel } = this.state
     const { editedTimer } = this.state
     const { editTask } = this.props
-    if (e.key === 'Enter') {
-      if (editedLabel === null || editedLabel.trim() === '') {
-        editedLabel = label
-      }
 
-      if (Object.values(editedTimer).some((time) => time !== null)) {
-        editedTimer.total = Object.values(editedTimer).reduce((acc, time) => acc + (time || 0), 0)
-      } else {
-        editedTimer.total = timer
-      }
-
-      if (editedId === null || editedId.trim() === '') {
-        editedId = id
-      }
-
-      const finalTimer = editedTimer.total
-      editTask(editedLabel, finalTimer, editedId)
-      this.setState({
-        editedId: '',
-        editedLabel: null,
-        editedTimer: {
-          months: null,
-          days: null,
-          hours: null,
-          minutes: null,
-          seconds: null,
-          total: null,
-        },
-      })
+    if (editedLabel === null || editedLabel.trim() === '') {
+      editedLabel = label
     }
+    if (Object.values(editedTimer).some((time) => time !== null)) {
+      editedTimer.total = Object.values(editedTimer).reduce((acc, time) => acc + (time || 0), 0)
+    } else {
+      editedTimer.total = timer
+    }
+
+    if (editedId === null || editedId.trim() === '') {
+      editedId = id
+    }
+
+    const finalTimer = editedTimer.total
+    editTask(editedLabel, finalTimer, editedId)
+
+    this.setState({
+      editedId: '',
+      editedLabel: null,
+      editedTimer: {
+        months: null,
+        days: null,
+        hours: null,
+        minutes: null,
+        seconds: null,
+        total: null,
+      },
+    })
   }
 
   onBlur = (e, id) => {
@@ -147,7 +146,13 @@ export default class TaskList extends Component {
           onTogglePause={() => onTogglePause(item.id)}
         />
         {item.editing && (
-          <form onBlur={(e) => this.onBlur(e, item.id)}>
+          <form
+            onBlur={(e) => this.onBlur(e, item.id)}
+            onSubmit={(e) => {
+              e.preventDefault()
+              this.onSubmit(e, item.label, item.timer, item.id)
+            }}
+          >
             <input
               type="text"
               className="edit"
@@ -438,6 +443,20 @@ export default class TaskList extends Component {
                 <option value="60">60 seconds</option>
               </select>
             </div>
+            <button
+              className="edit-todo-form__submit"
+              type="submit"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  this.onSubmit(e, item.label, item.timer, item.id)
+                }
+              }}
+              onClick={(e) => {
+                this.onSubmit(e, item.label, item.timer, item.id)
+              }}
+            >
+              ⏎
+            </button>
           </form>
         )}
       </li>

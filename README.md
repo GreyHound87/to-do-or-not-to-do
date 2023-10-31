@@ -1,6 +1,6 @@
 # TODO App with Timers
 
-# Ссылка на развернутое приложение: https://todo-ap8yldhzt-sergeis-projects-125bc965.vercel.app/
+# Ссылка на развернутое приложение: https://todo-3wcup9t87-sergeis-projects-125bc965.vercel.app
 
 Простое приложение для управления задачами с функциональностью таймера.
 

@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import TaskList from '../task-list/task-list'
 import Footer from '../footer/footer'
@@ -20,27 +20,18 @@ function createTask(label, timer) {
   }
 }
 
-export default class TodoApp extends Component {
-  state = {
-    taskData: [
-      createTask('Example task without timer', null),
-      createTask('Example task with 1 minute timer', 60000),
-      createTask('Example task with 10 minutes timer', 600000),
-    ],
-    filter: 'All',
-  }
+export default function TodoApp() {
+  const [taskData, setTaskData] = useState([
+    createTask('Example task without timer', null),
+    createTask('Example task with 1 minute timer', 60000),
+    createTask('Example task with 10 minutes timer', 600000),
+  ])
 
-  componentDidMount() {
-    this.intervalId = setInterval(this.decrementTimers, 1000)
-  }
+  const [filter, setFilter] = useState('All')
 
-  componentWillUnmount() {
-    clearInterval(this.intervalId)
-  }
-
-  decrementTimers = () => {
-    this.setState(({ taskData }) => {
-      const updatedTaskData = taskData.map((task) => {
+  const decrementTimers = () => {
+    setTaskData((prevTaskData) => {
+      const updatedTaskData = prevTaskData.map((task) => {
         if (task.tracking && task.timer !== null && !task.editing && !task.completed) {
           const updatedTimer = task.timer - 1000
           return {
@@ -51,29 +42,33 @@ export default class TodoApp extends Component {
         return task
       })
 
-      return {
-        taskData: updatedTaskData,
-      }
+      return updatedTaskData
     })
   }
 
-  destroyTask = (id) => {
-    this.setState(({ taskData }) => ({
-      taskData: taskData.filter((task) => task.id !== id),
+  useEffect(() => {
+    const intervalId = setInterval(decrementTimers, 1000)
+
+    return () => clearInterval(intervalId)
+  }, [taskData])
+
+  const destroyTask = (id) => {
+    setTaskData((prevTaskData) => ({
+      taskData: prevTaskData.filter((task) => task.id !== id),
     }))
   }
 
-  addTask = (text, timer) => {
+  const addTask = (text, timer) => {
     const newTask = createTask(text, timer)
-    this.setState(({ taskData }) => {
-      const newData = [...taskData, newTask]
-      return { taskData: newData, filter: 'All' }
-    })
+    setTaskData((prevTaskData) => ({
+      taskData: [...prevTaskData, newTask],
+      filter: 'All',
+    }))
   }
 
-  onToggleCompleted = (id) => {
-    this.setState(({ taskData }) => {
-      const updatedTaskData = taskData.map((task) => {
+  const onToggleCompleted = (id) => {
+    setTaskData((prevTaskData) => {
+      const updatedTaskData = prevTaskData.map((task) => {
         if (task.id === id) {
           return {
             ...task,
@@ -83,28 +78,24 @@ export default class TodoApp extends Component {
         return task
       })
 
-      return {
-        taskData: updatedTaskData,
-      }
+      return updatedTaskData
     })
   }
 
-  onToggleEditing = (id) => {
-    this.setState(({ taskData }) => {
-      const updatedTaskData = taskData.map((task) => ({
+  const onToggleEditing = (id) => {
+    setTaskData((prevTaskData) => {
+      const updatedTaskData = prevTaskData.map((task) => ({
         ...task,
         editing: task.id === id ? !task.editing : false,
       }))
 
-      return {
-        taskData: updatedTaskData,
-      }
+      return updatedTaskData
     })
   }
 
-  editTask = (text, timer, id) => {
-    this.setState(({ taskData }) => {
-      const updatedTaskData = taskData.map((task) => {
+  const editTask = (text, timer, id) => {
+    setTaskData((prevTaskData) => {
+      const updatedTaskData = prevTaskData.map((task) => {
         let newTimer = task.timer
         let newText = task.label
 
@@ -126,31 +117,21 @@ export default class TodoApp extends Component {
         }
       })
 
-      return {
-        taskData: updatedTaskData,
-      }
+      return updatedTaskData
     })
   }
 
-  onBlur = (id) => {
-    this.setState(({ taskData }) => {
-      const updatedTaskData = taskData.map((task) => ({
+  const onBlur = (id) => {
+    setTaskData((prevTaskData) => {
+      const updatedTaskData = prevTaskData.map((task) => ({
         ...task,
         editing: task.id === id ? false : task.editing,
       }))
-      return {
-        taskData: updatedTaskData,
-      }
+      return updatedTaskData
     })
   }
 
-  setFilter = (filter) => {
-    this.setState({ filter })
-  }
-
-  filterTasks = (tasks) => {
-    const { filter } = this.state
-
+  const filterTasks = (tasks) => {
     const filters = {
       Active: (arr) => arr.filter((task) => !task.completed),
       Completed: (arr) => arr.filter((task) => task.completed),
@@ -159,16 +140,15 @@ export default class TodoApp extends Component {
     return filters[filter] ? filters[filter](tasks) : tasks
   }
 
-  clearCompletedTasks = () => {
-    this.setState(({ taskData }) => {
-      const updatedTaskData = taskData.filter((task) => !task.completed)
-      return { taskData: updatedTaskData }
-    })
+  const clearCompletedTasks = () => {
+    setTaskData((prevTaskData) => ({
+      taskData: prevTaskData.filter((task) => !task.completed),
+    }))
   }
 
-  onTogglePlay = (id) => {
-    this.setState(({ taskData }) => {
-      const updatedTaskData = taskData.map((task) => {
+  const onTogglePlay = (id) => {
+    setTaskData((prevTaskData) => {
+      const updatedTaskData = prevTaskData.map((task) => {
         if (task.id === id) {
           return {
             ...task,
@@ -178,15 +158,13 @@ export default class TodoApp extends Component {
         return task
       })
 
-      return {
-        taskData: updatedTaskData,
-      }
+      return updatedTaskData
     })
   }
 
-  onTogglePause = (id) => {
-    this.setState(({ taskData }) => {
-      const updatedTaskData = taskData.map((task) => {
+  const onTogglePause = (id) => {
+    setTaskData((prevTaskData) => {
+      const updatedTaskData = prevTaskData.map((task) => {
         if (task.id === id) {
           return {
             ...task,
@@ -196,40 +174,30 @@ export default class TodoApp extends Component {
         return task
       })
 
-      return {
-        taskData: updatedTaskData,
-      }
+      return updatedTaskData
     })
   }
 
-  render() {
-    const { taskData, filter } = this.state
-    const filteredTasks = this.filterTasks(taskData)
-    const taskCount = taskData.filter((el) => !el.completed).length
+  const filteredTasks = filterTasks(taskData)
+  const taskCount = taskData.filter((el) => !el.completed).length
 
-    return (
-      <section className="todoapp">
-        <header className="header">
-          <h1>todos</h1>
-          <NewTaskForm onTaskAdded={this.addTask} />
-        </header>
-        <TaskList
-          onDestroy={this.destroyTask}
-          onToggleCompleted={this.onToggleCompleted}
-          onToggleEditing={this.onToggleEditing}
-          editTask={this.editTask}
-          tasks={filteredTasks}
-          onBlur={this.onBlur}
-          onTogglePlay={this.onTogglePlay}
-          onTogglePause={this.onTogglePause}
-        />
-        <Footer
-          taskCount={taskCount}
-          filter={filter}
-          setFilter={this.setFilter}
-          clearCompletedTasks={this.clearCompletedTasks}
-        />
-      </section>
-    )
-  }
+  return (
+    <section className="todoapp">
+      <header className="header">
+        <h1>todos</h1>
+        <NewTaskForm onTaskAdded={addTask} />
+      </header>
+      <TaskList
+        onDestroy={destroyTask}
+        onToggleCompleted={onToggleCompleted}
+        onToggleEditing={onToggleEditing}
+        editTask={editTask}
+        tasks={filteredTasks}
+        onBlur={onBlur}
+        onTogglePlay={onTogglePlay}
+        onTogglePause={onTogglePause}
+      />
+      <Footer taskCount={taskCount} filter={filter} setFilter={setFilter} clearCompletedTasks={clearCompletedTasks} />
+    </section>
+  )
 }

@@ -1,11 +1,43 @@
-import React, { Component } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
 
 import Task from '../task/task'
 import './task-list.css'
 
-export default class TaskList extends Component {
-  static convertToMilliseconds(unit, value) {
+function TaskList({
+  tasks,
+  onDestroy,
+  onToggleCompleted,
+  onToggleEditing,
+  onTogglePlay,
+  onTogglePause,
+  editTask,
+  onBlur,
+}) {
+  const [editedId, setEditedId] = useState('')
+  const [editedLabel, setEditedLabel] = useState(null)
+  const [editedTimer, setEditedTimer] = useState({
+    months: null,
+    days: null,
+    hours: null,
+    minutes: null,
+    seconds: null,
+    total: null,
+  })
+
+  const inputRef = useRef()
+
+  const focusInput = () => {
+    if (inputRef.current) {
+      inputRef.current.focus()
+    }
+  }
+
+  useEffect(() => {
+    focusInput()
+  }, [editedId])
+
+  const convertToMilliseconds = (unit, value) => {
     const unitToMilliseconds = {
       months: 30 * 24 * 60 * 60 * 1000,
       days: 24 * 60 * 60 * 1000,
@@ -17,121 +49,74 @@ export default class TaskList extends Component {
     return unitToMilliseconds[unit] * value || 0
   }
 
-  inputRef = React.createRef()
+  const onLabelChange = (e, id) => {
+    setEditedLabel(e.target.value)
+    setEditedId(id)
+  }
 
-  state = {
-    editedId: '',
-    editedLabel: null,
-    editedTimer: {
+  const onTimerChange = (id, unit, value) => {
+    const updatedTimer = { ...editedTimer }
+    const milliseconds = convertToMilliseconds(unit, parseInt(value, 10))
+    updatedTimer[unit] = milliseconds
+
+    setEditedTimer({
+      ...editedTimer,
+      total: Object.values(updatedTimer).reduce((acc, time) => acc + (time || 0), 0),
+    })
+    setEditedId(id)
+  }
+
+  const onSubmit = (e, label, timer, id) => {
+    e.preventDefault()
+    let finalLabel = editedLabel
+    let finalTimer = editedTimer.total
+
+    if (finalLabel === null || finalLabel.trim() === '') {
+      finalLabel = label
+    }
+
+    if (Object.values(editedTimer).some((time) => time !== null)) {
+      finalTimer = Object.values(editedTimer).reduce((acc, time) => acc + (time || 0), 0)
+    }
+
+    if (editedId === null || editedId.trim() === '') {
+      setEditedId(id)
+    }
+
+    editTask(finalLabel, finalTimer, editedId)
+
+    setEditedId('')
+    setEditedLabel(null)
+    setEditedTimer({
       months: null,
       days: null,
       hours: null,
       minutes: null,
       seconds: null,
       total: null,
-    },
-  }
-
-  componentDidMount() {
-    this.focusInput()
-  }
-
-  componentDidUpdate(prevProps) {
-    const { tasks } = this.props
-    if (tasks.some((task) => task.editing !== prevProps.tasks.find((prevTask) => prevTask.id === task.id)?.editing)) {
-      this.focusInput()
-    }
-  }
-
-  onLabelChange = (e, id) => {
-    this.setState({
-      editedLabel: e.target.value,
-      editedId: id,
     })
   }
 
-  onTimerChange = (id, unit, value) => {
-    const { editedTimer } = this.state
-    const updatedTimer = { ...editedTimer }
-    const milliseconds = TaskList.convertToMilliseconds(unit, parseInt(value, 10))
-    updatedTimer[unit] = milliseconds
-    this.setState(() => ({
-      editedTimer: updatedTimer,
-      editedId: id,
-    }))
-  }
-
-  onSubmit = (e, label, timer, id) => {
-    e.preventDefault()
-    let { editedId, editedLabel } = this.state
-    const { editedTimer } = this.state
-    const { editTask } = this.props
-
-    if (editedLabel === null || editedLabel.trim() === '') {
-      editedLabel = label
-    }
-    if (Object.values(editedTimer).some((time) => time !== null)) {
-      editedTimer.total = Object.values(editedTimer).reduce((acc, time) => acc + (time || 0), 0)
-    } else {
-      editedTimer.total = timer
-    }
-
-    if (editedId === null || editedId.trim() === '') {
-      editedId = id
-    }
-
-    const finalTimer = editedTimer.total
-    editTask(editedLabel, finalTimer, editedId)
-
-    this.setState({
-      editedId: '',
-      editedLabel: null,
-      editedTimer: {
-        months: null,
-        days: null,
-        hours: null,
-        minutes: null,
-        seconds: null,
-        total: null,
-      },
-    })
-  }
-
-  onBlur = (e, id) => {
-    const { onBlur } = this.props
+  const onBlurHandler = (e, id) => {
     if (e.relatedTarget && e.currentTarget.contains(e.relatedTarget)) {
       return
     }
-    this.setState({
-      editedId: '',
-      editedLabel: null,
-      editedTimer: {
-        months: null,
-        days: null,
-        hours: null,
-        minutes: null,
-        seconds: null,
-        total: null,
-      },
+    setEditedId('')
+    setEditedLabel(null)
+    setEditedTimer({
+      months: null,
+      days: null,
+      hours: null,
+      minutes: null,
+      seconds: null,
+      total: null,
     })
     onBlur(id)
   }
 
-  focusInput() {
-    if (this.inputRef.current) {
-      this.inputRef.current.focus()
-    }
-  }
-
-  render() {
-    const { editedLabel } = this.state
-    const { tasks, onDestroy, onToggleCompleted, onToggleEditing, onTogglePlay, onTogglePause } = this.props
-    const elements = tasks.map((item) => (
-      <li
-        key={item.id}
-        className={`${item.completed ? 'completed' : ''}
-        ${item.editing ? 'editing' : ''}`}
-      >
+  const renderTasks = () =>
+    tasks.map((item) => (
+      <li key={item.id} className={`${item.completed ? 'completed' : ''} ${item.editing ? 'editing' : ''}`}>
         <Task
           label={item.label}
           id={item.id}
@@ -147,10 +132,10 @@ export default class TaskList extends Component {
         />
         {item.editing && (
           <form
-            onBlur={(e) => this.onBlur(e, item.id)}
+            onBlur={(e) => onBlurHandler(e, item.id)}
             onSubmit={(e) => {
               e.preventDefault()
-              this.onSubmit(e, item.label, item.timer, item.id)
+              onSubmit(e, item.label, item.timer, item.id)
             }}
           >
             <input
@@ -166,11 +151,11 @@ export default class TaskList extends Component {
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.preventDefault()
-                  this.onSubmit(e, item.label, item.timer, item.id)
+                  onSubmit(e, item.label, item.timer, item.id)
                 }
               }}
-              onChange={(e) => this.onLabelChange(e, item.id)}
-              ref={this.inputRef}
+              onChange={(e) => onLabelChange(e, item.id)}
+              ref={inputRef}
               style={{
                 backgroundColor:
                   typeof editedLabel === 'string' && editedLabel.trim() === '' ? 'rgba(175, 47, 47, 0.15)' : 'initial',
@@ -182,11 +167,11 @@ export default class TaskList extends Component {
                 className="edit-todo-form__timer"
                 id={`edit-months-${item.id}`}
                 name={`edit-months-${item.id}`}
-                onChange={(e) => this.onTimerChange(item.id, 'months', e.target.value)}
+                onChange={(e) => onTimerChange(item.id, 'months', e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault()
-                    this.onSubmit(e, item.label, item.timer, item.id)
+                    onSubmit(e, item.label, item.timer, item.id)
                   }
                 }}
               >
@@ -209,11 +194,11 @@ export default class TaskList extends Component {
                 className="edit-todo-form__timer"
                 id={`edit-days-${item.id}`}
                 name={`edit-days-${item.id}`}
-                onChange={(e) => this.onTimerChange(item.id, 'days', e.target.value)}
+                onChange={(e) => onTimerChange(item.id, 'days', e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault()
-                    this.onSubmit(e, item.label, item.timer, item.id)
+                    onSubmit(e, item.label, item.timer, item.id)
                   }
                 }}
               >
@@ -256,11 +241,11 @@ export default class TaskList extends Component {
                 className="edit-todo-form__timer"
                 id={`edit-hours-${item.id}`}
                 name={`edit-hours-${item.id}`}
-                onChange={(e) => this.onTimerChange(item.id, 'hours', e.target.value)}
+                onChange={(e) => onTimerChange(item.id, 'hours', e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault()
-                    this.onSubmit(e, item.label, item.timer, item.id)
+                    onSubmit(e, item.label, item.timer, item.id)
                   }
                 }}
               >
@@ -296,11 +281,11 @@ export default class TaskList extends Component {
                 className="edit-todo-form__timer"
                 id={`edit-minutes-${item.id}`}
                 name={`edit-minutes-${item.id}`}
-                onChange={(e) => this.onTimerChange(item.id, 'minutes', e.target.value)}
+                onChange={(e) => onTimerChange(item.id, 'minutes', e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault()
-                    this.onSubmit(e, item.label, item.timer, item.id)
+                    onSubmit(e, item.label, item.timer, item.id)
                   }
                 }}
               >
@@ -371,11 +356,11 @@ export default class TaskList extends Component {
                 className="edit-todo-form__timer"
                 id={`edit-seconds-${item.id}`}
                 name={`edit-seconds-${item.id}`}
-                onChange={(e) => this.onTimerChange(item.id, 'seconds', e.target.value)}
+                onChange={(e) => onTimerChange(item.id, 'seconds', e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault()
-                    this.onSubmit(e, item.label, item.timer, item.id)
+                    onSubmit(e, item.label, item.timer, item.id)
                   }
                 }}
               >
@@ -448,11 +433,11 @@ export default class TaskList extends Component {
               type="submit"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  this.onSubmit(e, item.label, item.timer, item.id)
+                  onSubmit(e, item.label, item.timer, item.id)
                 }
               }}
               onClick={(e) => {
-                this.onSubmit(e, item.label, item.timer, item.id)
+                onSubmit(e, item.label, item.timer, item.id)
               }}
             >
               ⏎
@@ -462,12 +447,11 @@ export default class TaskList extends Component {
       </li>
     ))
 
-    return (
-      <main className="main">
-        <ul className="todo-list">{elements}</ul>
-      </main>
-    )
-  }
+  return (
+    <main className="main">
+      <ul className="todo-list">{renderTasks()}</ul>
+    </main>
+  )
 }
 
 TaskList.defaultProps = {
@@ -499,3 +483,5 @@ TaskList.propTypes = {
   onTogglePlay: PropTypes.func,
   onTogglePause: PropTypes.func,
 }
+
+export default TaskList

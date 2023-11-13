@@ -150,6 +150,22 @@
   animation: textBlink 1s infinite;
 }
 
+.time-left--very-low {
+  text-shadow: 0 0 1px #E90000;
+}
+
+.time-left--low {
+  text-shadow: 0 0 1px #E97E00;
+}
+
+.time-left--medium {
+  text-shadow: 0 0 1px #E9D100;
+}
+
+.time-left--sufficient {
+  text-shadow: 0 0 1px #66E900;
+}
+
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
   .todo-list li .toggle {
     background: none;

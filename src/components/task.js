@@ -1,6 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { formatDistanceToNow } from 'date-fns'
+import classnames from 'classnames'
+
+import formatTimeLeft from '../helpers/format-time-left'
+
 import './task.css'
 
 function Task({
@@ -44,42 +48,14 @@ function Task({
     onTogglePause: PropTypes.func,
   }
 
-  const colorGradation = {
-    red: '#E90000',
-    orange: '#E97E00',
-    yellow: '#E9D100',
-    green: '#66E900',
-  }
+  const formattedTimeLeft = formatTimeLeft(timer)
 
-  function getColorForTimer() {
-    if (timer <= 86400000) {
-      return colorGradation.red
-    }
-    if (timer <= 604800000) {
-      return colorGradation.orange
-    }
-    if (timer <= 2592000000) {
-      return colorGradation.yellow
-    }
-    return colorGradation.green
-  }
-
-  const timerColor = getColorForTimer(timer)
-
-  function formatTimeLeft() {
-    if (timer === 0) {
-      return 'time is over'
-    }
-    if (timer <= 3600000) {
-      const minutes = Math.floor(timer / 60000)
-      const seconds = Math.floor((timer % 60000) / 1000)
-      return `${minutes}:${seconds < 10 ? '0' : ''}${seconds} left`
-    }
-
-    return `${formatDistanceToNow(new Date(new Date().getTime() + timer), {
-      includeSeconds: true,
-    })} left`
-  }
+  const timeLeftMod = classnames({
+    'time-left--very-low': timer <= 86400000,
+    'time-left--low': timer > 86400000 && timer <= 604800000,
+    'time-left--medium': timer > 604800000 && timer <= 2592000000,
+    'time-left--sufficient': timer > 2592000000,
+  })
 
   return (
     <div
@@ -104,10 +80,9 @@ function Task({
           })} ago`}</span>
           {timer !== null && (
             <span
-              className={`time-left ${tracking && timer && !completed ? 'blinking-text' : ''}`}
-              style={{ textShadow: `0 0 1px ${timerColor}` }}
+              className={classnames('time-left', { 'blinking-text': tracking && timer && !completed }, timeLeftMod)}
             >
-              {formatTimeLeft(timer)}
+              {formattedTimeLeft}
             </span>
           )}
         </label>

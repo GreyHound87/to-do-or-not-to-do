@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 
-import TaskList from './task-list'
-import Footer from './footer'
-import NewTaskForm from './new-task-form'
+import TaskList from '../task-list/task-list'
+import Footer from '../footer/footer'
+import NewTaskForm from '../new-task-form/new-task-form'
 import './todo-app.css'
 
 function createTask(label, timer) {

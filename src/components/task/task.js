@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { formatDistanceToNow } from 'date-fns'
 import classnames from 'classnames'
 
-import formatTimeLeft from '../helpers/format-time-left'
+import formatTimeLeft from '../../helpers/format-time-left'
 
 import './task.css'
 
